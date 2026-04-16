@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+BUILD_DIR="$ROOT_DIR/build/typechecker"
+CLASSPATH="$ROOT_DIR/lib/java-cup-0.11b-runtime.jar:$BUILD_DIR"
+JAVA_CMD="$($ROOT_DIR/scripts/resolve-java-cmd.sh)"
+
+if [ $# -ne 1 ]; then
+  echo "Usage: ./run-typechecker <source-file>"
+  echo "Example: ./run-typechecker examples/typecheck-valid.simple"
+  exit 1
+fi
+
+if [ ! -d "$BUILD_DIR" ]; then
+  JAVA="$JAVA_CMD" make -C "$ROOT_DIR" compile-typechecker >/dev/null
+fi
+
+if [[ "$1" = /* ]]; then
+  INPUT_FILE="$1"
+else
+  INPUT_FILE="$ROOT_DIR/$1"
+fi
+
+"$JAVA_CMD" -cp "$CLASSPATH" TypeEvaluator "$INPUT_FILE"

@@ -1,0 +1,16 @@
+# Test 4: Nested control structures
+begin
+  int x;
+  int y;
+  
+  x = 1;
+  y = 10;
+  while (x <= 5) do
+    if (x % 2 == 1) then
+      y = y - x;
+    else
+      y = y + x;
+    fi
+    x = x + 1;
+  done
+end

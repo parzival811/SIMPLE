@@ -1,0 +1,8 @@
+# Test 19: Unreachable code detection
+begin
+  function int unreachable_test() begin
+    int x;
+    return 42;
+    x = 10; # Error
+  end
+end

@@ -1,0 +1,12 @@
+# Test 6: Function with multiple parameters
+begin
+  int result;
+  
+  function int add(int a, int b) begin
+    int sum;
+    sum = a + b;
+    return sum;
+  end
+  
+  result = add(10, 20);
+end

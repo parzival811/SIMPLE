@@ -1,0 +1,19 @@
+# Example 10: Boolean expressions and return statements in functions
+begin
+  bool result;
+  int a;
+  int b;
+  
+  function bool isEven(int n) begin
+    if (n % 2 == 0) then
+      return true;
+    else
+      return false;
+    fi
+  end
+  
+  a = 5;
+  b = 10;
+  result = a < b;
+  result = isEven(4);
+end

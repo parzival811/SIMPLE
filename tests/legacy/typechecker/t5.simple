@@ -1,0 +1,12 @@
+# Test 5: Function declaration with one parameter and return
+begin
+  int y;
+  
+  function int square(int x) begin
+    int result;
+    result = x * x;
+    return result;
+  end
+  
+  y = square(5);
+end

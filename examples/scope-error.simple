@@ -1,0 +1,12 @@
+# Invalid program: functions do not capture outer variables
+begin
+  int global_value;
+  int result;
+
+  function int pure_add(int x) begin
+    return global_value + x;
+  end
+
+  global_value = 5;
+  result = pure_add(10);
+end

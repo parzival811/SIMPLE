@@ -1,0 +1,46 @@
+# Test that only functions are pure - other scopes can access outer variables
+begin
+  int global_var;
+  int result1;
+  int result2;
+  int result3;
+  
+  function int pure_func(int x) begin
+    int local_var;
+    # This should fail - functions can't access global_var
+    local_var = global_var + x;
+    return local_var;
+  end
+  
+  function int test_other_scopes() begin
+    int func_local;
+    
+    func_local = 10;
+    
+    # Test that if can access function-local variables
+    if (func_local > 5) then
+      int if_local;
+      if_local = func_local + 20;  # Can access func_local
+      func_local = if_local;
+    fi
+    
+    # Test that while can access function-local variables  
+    while (func_local > 25) do
+      int loop_local;
+      loop_local = func_local - 5;  # Can access func_local
+      func_local = loop_local;
+    done
+    
+    # Test that explicit blocks can access function-local variables
+    begin
+      int block_local;
+      block_local = func_local + 100;  # Can access func_local
+      func_local = block_local;
+    end
+    
+    return func_local;
+  end
+  
+  global_var = 5;
+  result1 = pure_func(10);  # This should fail
+end

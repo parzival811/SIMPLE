@@ -1,0 +1,16 @@
+# Example 9: Prime number check algorithm
+begin
+  int num;
+  bool isPrime;
+  int i;
+  
+  num = 17;
+  isPrime = true;
+  i = 2;
+  while (i * i <= num) do
+    if (num % i == 0) then
+      isPrime = false;
+    fi
+    i = i + 1;
+  done
+end

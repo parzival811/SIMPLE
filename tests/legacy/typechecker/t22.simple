@@ -1,0 +1,11 @@
+# Test 22: Compatible return types in sequence with missing path
+begin
+  function int compatible_types(bool flag1, bool flag2) begin
+    if (flag1) then
+      return 42;
+    fi
+    if (flag2) then
+      return 100;
+    fi
+  end
+end

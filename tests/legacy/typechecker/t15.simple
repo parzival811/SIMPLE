@@ -1,0 +1,5 @@
+# Test 15: Type error - assigning boolean to int variable
+begin
+  int x;
+  x = true; # Error
+end

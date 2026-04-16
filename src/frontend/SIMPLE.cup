@@ -1,0 +1,290 @@
+/* CUP specification for SIMPLE language parser */
+
+import java_cup.runtime.*;
+import java.util.*;
+
+/* Parser code */
+parser code {:
+    private SimpleLexer lexer;
+    
+    public SimpleParser(SimpleLexer lexer) {
+        super(lexer);
+        this.lexer = lexer;
+    }
+    
+    public void syntax_error(Symbol cur_token) {
+        report_error("Syntax error at line " + (cur_token.left + 1) + 
+                    ", column " + (cur_token.right + 1) + 
+                    ", token: " + cur_token.value, null);
+    }
+    
+    public void unrecovered_syntax_error(Symbol cur_token) throws java.lang.Exception {
+        report_fatal_error("Couldn't repair and continue parse", null);
+    }
+:}
+
+/* Expect some conflicts due to expression precedence */
+scan with {: return lexer.next_token(); :};
+
+/* Terminal symbols */
+terminal String IDENTIFIER;
+terminal Integer INTEGER;
+terminal BEGIN, END, WHILE, DO, DONE, IF, THEN, ELSE, FI, FUNCTION, RETURN;
+terminal INT, BOOL, VOID, TRUE, FALSE;
+terminal ASSIGN, PLUS, MINUS, MULTIPLY, DIVIDE, MODULO;
+terminal LESS_THAN, GREATER_THAN, LESS_EQUAL, GREATER_EQUAL, EQUALS, NOT_EQUALS;
+terminal LPAREN, RPAREN, SEMICOLON, COMMA;
+
+/* Non-terminal symbols */
+non terminal Sequence program;
+non terminal Statement simple_statement, compound_statement, statement;
+non terminal Sequence block_content;
+non terminal List<Statement> declarations, function_definitions, statement_list;
+non terminal AssignmentStatement assignment;
+non terminal VariableDeclaration variable_declaration;
+non terminal ReturnStatement return_statement;
+non terminal WhileStatement while_statement;
+non terminal IfStatement if_statement;
+non terminal FunctionDeclaration function_declaration;
+non terminal FunctionCall function_call;
+non terminal FunctionCallExpression function_call_expr;
+non terminal ScopedBlock scoped_block;
+non terminal Expression expression;
+non terminal Variable variable;
+non terminal NumericLiteral number;
+non terminal BooleanLiteral boolean;
+non terminal String type;
+non terminal VariableDeclaration parameter;
+non terminal List<VariableDeclaration> parameter_list, parameter_list_non_empty;
+non terminal List<Expression> argument_list, argument_list_non_empty;
+
+/* Precedence and associativity */
+precedence left EQUALS, NOT_EQUALS;
+precedence left LESS_THAN, GREATER_THAN, LESS_EQUAL, GREATER_EQUAL;
+precedence left PLUS, MINUS;
+precedence left MULTIPLY, DIVIDE, MODULO;
+
+/* Grammar rules */
+
+program ::= scoped_block:sb
+    {: RESULT = sb.getBody(); :}
+    ;
+
+scoped_block ::= BEGIN block_content:bc END
+    {: RESULT = new ScopedBlock(bc); :}
+    ;
+
+block_content ::= declarations:decls function_definitions:funcs statement_list:stmts
+    {: 
+        Sequence seq = new Sequence();
+        for (Statement d : decls) seq.addStatement(d);
+        for (Statement f : funcs) seq.addStatement(f);
+        for (Statement s : stmts) seq.addStatement(s);
+        RESULT = seq; 
+    :}
+    | declarations:decls function_definitions:funcs
+    {: 
+        Sequence seq = new Sequence();
+        for (Statement d : decls) seq.addStatement(d);
+        for (Statement f : funcs) seq.addStatement(f);
+        RESULT = seq; 
+    :}
+    | declarations:decls statement_list:stmts
+    {: 
+        Sequence seq = new Sequence();
+        for (Statement d : decls) seq.addStatement(d);
+        for (Statement s : stmts) seq.addStatement(s);
+        RESULT = seq; 
+    :}
+    | declarations:decls
+    {: 
+        Sequence seq = new Sequence();
+        for (Statement d : decls) seq.addStatement(d);
+        RESULT = seq; 
+    :}
+    | function_definitions:funcs statement_list:stmts
+    {: 
+        Sequence seq = new Sequence();
+        for (Statement f : funcs) seq.addStatement(f);
+        for (Statement s : stmts) seq.addStatement(s);
+        RESULT = seq; 
+    :}
+    | function_definitions:funcs
+    {: 
+        Sequence seq = new Sequence();
+        for (Statement f : funcs) seq.addStatement(f);
+        RESULT = seq; 
+    :}
+    | statement_list:stmts
+    {: 
+        Sequence seq = new Sequence();
+        for (Statement s : stmts) seq.addStatement(s);
+        RESULT = seq; 
+    :}
+    | /* empty */
+    {: RESULT = new Sequence(); :}
+    ;
+
+declarations ::= declarations:decls variable_declaration:v SEMICOLON
+    {: decls.add(v); RESULT = decls; :}
+    | variable_declaration:v SEMICOLON
+    {: List<Statement> list = new ArrayList<Statement>(); list.add(v); RESULT = list; :}
+    ;
+
+function_definitions ::= function_definitions:funcs function_declaration:f
+    {: funcs.add(f); RESULT = funcs; :}
+    | function_declaration:f
+    {: List<Statement> list = new ArrayList<Statement>(); list.add(f); RESULT = list; :}
+    ;
+
+statement_list ::= statement_list:stmts statement:s
+    {: stmts.add(s); RESULT = stmts; :}
+    | statement:s
+    {: List<Statement> list = new ArrayList<Statement>(); list.add(s); RESULT = list; :}
+    ;
+
+statement ::= simple_statement:s SEMICOLON
+    {: RESULT = s; :}
+    | compound_statement:cs
+    {: RESULT = cs; :}
+    ;
+
+simple_statement ::= assignment:a
+    {: RESULT = a; :}
+    | return_statement:r
+    {: RESULT = r; :}
+    | function_call:f
+    {: RESULT = f; :}
+    ;
+
+compound_statement ::= while_statement:w
+    {: RESULT = w; :}
+    | if_statement:i
+    {: RESULT = i; :}
+    | scoped_block:b
+    {: RESULT = b; :}
+    ;
+
+
+
+assignment ::= variable:v ASSIGN expression:e
+    {: RESULT = new AssignmentStatement(v, e); :}
+    ;
+
+variable_declaration ::= type:t IDENTIFIER:name
+    {: RESULT = new VariableDeclaration(t, name); :}
+    ;
+
+return_statement ::= RETURN expression:e
+    {: RESULT = new ReturnStatement(e); :}
+    | RETURN
+    {: RESULT = new ReturnStatement(); :}
+    ;
+
+type ::= INT
+    {: RESULT = "int"; :}
+    | BOOL
+    {: RESULT = "bool"; :}
+    | VOID
+    {: RESULT = "void"; :}
+    ;
+
+while_statement ::= WHILE LPAREN expression:e RPAREN DO block_content:bc DONE
+    {: RESULT = new WhileStatement(e, bc); :}
+    ;
+
+if_statement ::= IF LPAREN expression:e RPAREN THEN block_content:bc FI
+    {: RESULT = new IfStatement(e, bc); :}
+    | IF LPAREN expression:e RPAREN THEN block_content:bc1 ELSE block_content:bc2 FI
+    {: RESULT = new IfStatement(e, bc1, bc2); :}
+    ;
+
+function_declaration ::= FUNCTION type:ret_type IDENTIFIER:name LPAREN parameter_list:pl RPAREN BEGIN block_content:body END
+    {: RESULT = new FunctionDeclaration(name, ret_type, pl, body); :}
+    ;
+
+function_call ::= IDENTIFIER:name LPAREN argument_list:al RPAREN
+    {: RESULT = new FunctionCall(name, al); :}
+    ;
+
+function_call_expr ::= IDENTIFIER:name LPAREN argument_list:al RPAREN
+    {: RESULT = new FunctionCallExpression(name, al); :}
+    ;
+
+parameter ::= type:t IDENTIFIER:name
+    {: RESULT = new VariableDeclaration(t, name); :}
+    ;
+
+parameter_list ::= parameter_list_non_empty:pl
+    {: RESULT = pl; :}
+    | /* empty */
+    {: RESULT = new ArrayList<VariableDeclaration>(); :}
+    ;
+
+parameter_list_non_empty ::= parameter_list_non_empty:pl COMMA parameter:p
+    {: pl.add(p); RESULT = pl; :}
+    | parameter:p
+    {: List<VariableDeclaration> list = new ArrayList<VariableDeclaration>(); list.add(p); RESULT = list; :}
+    ;
+
+argument_list ::= argument_list_non_empty:al
+    {: RESULT = al; :}
+    | /* empty */
+    {: RESULT = new ArrayList<Expression>(); :}
+    ;
+
+argument_list_non_empty ::= argument_list_non_empty:al COMMA expression:e
+    {: al.add(e); RESULT = al; :}
+    | expression:e
+    {: List<Expression> list = new ArrayList<Expression>(); list.add(e); RESULT = list; :}
+    ;
+
+expression ::= expression:e1 EQUALS expression:e2
+    {: RESULT = new BinaryOperation(e1, BinaryOperation.Operator.EQUALS, e2); :}
+    | expression:e1 NOT_EQUALS expression:e2
+    {: RESULT = new BinaryOperation(e1, BinaryOperation.Operator.NOT_EQUALS, e2); :}
+    | expression:e1 LESS_THAN expression:e2
+    {: RESULT = new BinaryOperation(e1, BinaryOperation.Operator.LESS_THAN, e2); :}
+    | expression:e1 GREATER_THAN expression:e2
+    {: RESULT = new BinaryOperation(e1, BinaryOperation.Operator.GREATER_THAN, e2); :}
+    | expression:e1 LESS_EQUAL expression:e2
+    {: RESULT = new BinaryOperation(e1, BinaryOperation.Operator.LESS_EQUAL, e2); :}
+    | expression:e1 GREATER_EQUAL expression:e2
+    {: RESULT = new BinaryOperation(e1, BinaryOperation.Operator.GREATER_EQUAL, e2); :}
+    | expression:e1 PLUS expression:e2
+    {: RESULT = new BinaryOperation(e1, BinaryOperation.Operator.PLUS, e2); :}
+    | expression:e1 MINUS expression:e2
+    {: RESULT = new BinaryOperation(e1, BinaryOperation.Operator.MINUS, e2); :}
+    | expression:e1 MULTIPLY expression:e2
+    {: RESULT = new BinaryOperation(e1, BinaryOperation.Operator.MULTIPLY, e2); :}
+    | expression:e1 DIVIDE expression:e2
+    {: RESULT = new BinaryOperation(e1, BinaryOperation.Operator.DIVIDE, e2); :}
+    | expression:e1 MODULO expression:e2
+    {: RESULT = new BinaryOperation(e1, BinaryOperation.Operator.MODULO, e2); :}
+    | MINUS expression:e
+    {: RESULT = new BinaryOperation(new NumericLiteral(0), BinaryOperation.Operator.MINUS, e); :}
+    | LPAREN expression:e RPAREN
+    {: RESULT = e; :}
+    | variable:v
+    {: RESULT = v; :}
+    | number:n
+    {: RESULT = n; :}
+    | boolean:b
+    {: RESULT = b; :}
+    | function_call_expr:f
+    {: RESULT = f; :}
+    ;
+
+variable ::= IDENTIFIER:id
+    {: RESULT = new Variable(id); :}
+    ;
+
+number ::= INTEGER:i
+    {: RESULT = new NumericLiteral(i); :}
+    ;
+
+boolean ::= TRUE
+    {: RESULT = new BooleanLiteral(true); :}
+    | FALSE
+    {: RESULT = new BooleanLiteral(false); :}
+    ;

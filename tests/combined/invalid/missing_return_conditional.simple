@@ -1,0 +1,8 @@
+# Invalid program: one control-flow path forgets to return
+begin
+  function int missing_return(bool flag) begin
+    if (flag) then
+      return 42;
+    fi
+  end
+end

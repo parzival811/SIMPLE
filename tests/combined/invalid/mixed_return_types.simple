@@ -1,0 +1,11 @@
+# Test 21: Incompatible types in conditional paths
+begin
+  function int mixed_conditionals(bool flag1, bool flag2) begin
+    if (flag1) then
+      return 42;
+    fi
+    if (flag2) then
+      return true;
+    fi
+  end
+end

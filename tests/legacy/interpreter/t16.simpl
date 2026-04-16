@@ -1,0 +1,23 @@
+# Test that loop/if variables don't leak
+begin
+  int x;
+  
+  function int test_leak() begin
+    int y;
+    
+    y = 5;
+    
+    if (y > 0) then
+      int temp;
+      temp = y + 10;
+      y = temp;
+    fi
+    
+    # This should fail - temp should not be accessible here
+    temp = y + 5;
+    
+    return y;
+  end
+  
+  x = test_leak();
+end

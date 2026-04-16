@@ -1,0 +1,14 @@
+# Typed function interpreted at runtime
+begin
+  bool result;
+
+  function bool isEven(int n) begin
+    if (n % 2 == 0) then
+      return true;
+    else
+      return false;
+    fi
+  end
+
+  result = isEven(8);
+end

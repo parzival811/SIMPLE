@@ -1,0 +1,8 @@
+# Test 18: Function with missing return path (conditional)
+begin
+  function int missing_return(bool flag) begin
+    if (flag) then
+      return 42;
+    fi
+  end
+end

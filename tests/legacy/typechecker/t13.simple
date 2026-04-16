@@ -1,0 +1,13 @@
+# Test 13: Pure Functions
+begin
+  int global_var;
+  
+  function int pure_func(int x) begin
+    int local_var;
+    local_var = global_var + x; # Error
+    return local_var;
+  end
+  
+  global_var = 5;
+  result1 = pure_func(10);
+end

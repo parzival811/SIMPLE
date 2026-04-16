@@ -1,0 +1,17 @@
+# Example 13: Advanced features showcase (types, scoping, semicolons)
+begin
+  int x;
+  int y;
+  
+  x = 1;
+  y = 5;
+  
+  while (x < 5) do
+    if (x % 2 == 1) then
+      y = y - x;
+    else
+      y = y + 1;
+    fi
+    x = x + 1;
+  done
+end

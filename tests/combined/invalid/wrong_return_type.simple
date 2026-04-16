@@ -1,0 +1,6 @@
+# Test 20: Incompatible return types in sequence
+begin
+  function int mixed_types() begin
+    return true;  # Error
+  end
+end

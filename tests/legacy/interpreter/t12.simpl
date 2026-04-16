@@ -1,0 +1,10 @@
+# Example 12: Bare return statement (void functions)
+begin
+  function void voidFunc() begin
+    int x;
+    x = 42;
+    return;
+  end
+  
+  voidFunc();
+end

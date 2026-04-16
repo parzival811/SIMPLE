@@ -1,0 +1,6 @@
+# Test 16: Duplicate parameter names
+begin
+  function int test(int x, bool x) begin  # Error
+    return 1;
+  end
+end

@@ -1,0 +1,18 @@
+# Test 11: Scoped blocks with local variables and nested scopes
+begin
+  int x;
+  
+  function int test(int y) begin
+    int z;
+    z = y + 1;
+    return z;
+  end
+  
+  x = 10;
+  
+  begin
+    bool local_flag;
+    local_flag = false;
+    x = test(5);
+  end
+end

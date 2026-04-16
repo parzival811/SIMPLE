@@ -1,0 +1,7 @@
+# Test 17: Function that never returns (missing return)
+begin
+  function int never_returns() begin
+    int x;
+    x = 5;  # Error
+  end
+end

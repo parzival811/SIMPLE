@@ -1,0 +1,22 @@
+# Test 14: Variables don't leak
+begin
+  int x;
+  
+  function int test_leak() begin
+    int y;
+    
+    y = 5;
+    
+    if (y > 0) then
+      int temp;
+      temp = y + 10;
+      y = temp;
+    fi
+    
+    temp = y + 5; # Error
+    
+    return y;
+  end
+  
+  x = test_leak();
+end

@@ -1,0 +1,10 @@
+# Test 12: Void functions
+begin
+  function void voidFunc() begin
+    int x;
+    x = 42;
+    return;
+  end
+  
+  voidFunc();
+end

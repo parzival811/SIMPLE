@@ -1,0 +1,20 @@
+# Test 23: Nested conditional with all paths returning
+begin
+  function int nested_return(int x, bool flag1, bool flag2) begin
+    if (flag1) then
+      if (flag2) then
+        return x * 2;
+      else
+        return x + 10;
+      fi
+    else
+      while (x > 0) do
+        if (x % 2 == 0) then
+            return x / 2;
+        fi
+        x = x - 1;
+      done
+      return 0;
+    fi
+  end
+end

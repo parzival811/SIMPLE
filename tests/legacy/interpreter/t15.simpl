@@ -1,0 +1,32 @@
+# Test scoping in loops and conditionals
+begin
+  int outer_var;
+  int result;
+  
+  function int test_scoping() begin
+    int func_var;
+    
+    func_var = 10;
+    
+    while (func_var > 5) do
+      int loop_local;
+      loop_local = func_var * 2;
+      func_var = func_var - 1;
+    done
+    
+    if (func_var < 10) then
+      int if_local;
+      if_local = func_var + 100;
+      func_var = if_local;
+    else
+      int else_local;
+      else_local = func_var - 100;
+      func_var = else_local;
+    fi
+    
+    return func_var;
+  end
+  
+  outer_var = 5;
+  result = test_scoping();
+end
